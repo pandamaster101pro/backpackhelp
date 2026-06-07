@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:backpackhelp/Bottem_bar.dart';
 import 'package:backpackhelp/HomeScreen.dart';
 import 'package:backpackhelp/Login.dart';
+import 'package:backpackhelp/Connection.dart';
 import 'package:backpackhelp/Profilepage.dart';
 import 'package:backpackhelp/Scan.dart';
 import 'package:backpackhelp/Signup.dart';
@@ -38,7 +39,8 @@ class MyApp extends StatelessWidget {
         "/scan": (context) => ScanScreen(),
         "/signupscreen": (context) => SignupScreen(),
         "/bottombar": (context) => bottom_bar(),
-        "/profilepage": (context) => Profilepage()
+        "/profilepage": (context) => Profilepage(),
+        "/connection": (context) => const ConnectionScreen(),
 
       },
     );

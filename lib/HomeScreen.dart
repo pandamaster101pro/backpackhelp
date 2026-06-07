@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:backpackhelp/Profilepage.dart';
-import 'package:backpackhelp/constants.dart';
 
 class Homescreen extends StatefulWidget {
   const Homescreen({super.key});
@@ -30,6 +29,11 @@ class _HomescreenState extends State<Homescreen> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.bluetooth, size: 22, color: Colors.black54),
+            onPressed: () => Navigator.pushNamed(context, '/connection'),
+            tooltip: 'Bluetooth connection',
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: GestureDetector(
@@ -179,6 +183,28 @@ class _HomescreenState extends State<Homescreen> {
                 icon: const Icon(Icons.loop, size: 18),
                 label: const Text(
                   "Rescan",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.black87,
+                  side: const BorderSide(color: Colors.black26),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, '/connection'),
+                icon: const Icon(Icons.bluetooth, size: 18),
+                label: const Text(
+                  "Bluetooth connection",
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(

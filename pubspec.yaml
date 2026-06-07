@@ -30,7 +30,8 @@ environment:
 dependencies:
   http: ^1.2.0
   shared_preferences: ^2.3.0
-  flutter_blue_plus: ^1.31.0
+  flutter_blue_plus: ^1.32.0
+
   flutter:
     sdk: flutter
 
@@ -42,6 +43,7 @@ dependencies:
   firebase_auth: ^6.1.0
   cloud_firestore: ^6.0.2
   firebase_database: ^12.0.2
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

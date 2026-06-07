@@ -157,6 +157,14 @@ class _ProfilepageState extends State<Profilepage> {
                 ),
               ),
               ListTile(
+                leading: const Icon(Icons.bluetooth, size: 20, color: Colors.black54),
+                title: const Text("Bluetooth", style: TextStyle(fontSize: 15)),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/connection');
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.logout, size: 20, color: Colors.black54),
                 title: const Text("Log out", style: TextStyle(fontSize: 15)),
                 onTap: () => Navigator.pop(context, 'logout'),
