@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:backpackhelp/GuestSession.dart';
 import 'package:backpackhelp/bluetooth.dart';
+import 'package:backpackhelp/raspberry_pi_client.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class ScanScreen extends StatefulWidget {
@@ -18,13 +20,16 @@ class _ScanScreenState extends State<ScanScreen> {
   static const _background = Color(0xFFF7F7F5);
 
   final _ble = BluetoothManager.instance;
+  final _pi = RaspberryPiClient.instance;
 
   User? _user;
   bool _btOn = false;
   bool _isScanning = false;
   bool _isConnecting = false;
   bool _nothingFound = false;
+  int _scanGeneration = 0;
   String? _weight;
+  List<String> _localScannedItems = [];
   String _statusTitle = 'Ready to scan';
   String _statusSubtitle = 'Tap Scan to search for your backpack';
 
@@ -34,12 +39,11 @@ class _ScanScreenState extends State<ScanScreen> {
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
-    _ble.addListener(_onBleStateChanged);
-    _dataStreamSub = _ble.dataStream.listen(_onDataReceived);
-    _ble.requestPermissions();
-    _initBluetooth();
+    _btOn = true;
   }
 
+  // Kept for compatibility with the existing BLE scanner implementation.
+  // ignore: unused_element
   void _onBleStateChanged() {
     if (!mounted || !_isScanning) return;
 
@@ -58,11 +62,13 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _initBluetooth() async {
     final on = await _ble.isBluetoothOn();
     if (!mounted) return;
     setState(() => _btOn = on);
   }
+
   Future<void> _connectToBackpack(ScanResult result) async {
     if (_isConnecting) return;
     _isConnecting = true;
@@ -97,6 +103,7 @@ class _ScanScreenState extends State<ScanScreen> {
     _isConnecting = false;
   }
 
+  // ignore: unused_element
   void _onDataReceived(String message) {
     if (message.contains('Book Detected!')) {
       final items = List.of(_ble.scannedItems);
@@ -119,7 +126,8 @@ class _ScanScreenState extends State<ScanScreen> {
       if (weight != null) _weight = weight;
       if (items.isNotEmpty) {
         _statusTitle = 'Scan complete';
-        _statusSubtitle = '${items.length} item${items.length == 1 ? '' : 's'} detected';
+        _statusSubtitle =
+            '${items.length} item${items.length == 1 ? '' : 's'} detected';
       }
     });
 
@@ -137,11 +145,17 @@ class _ScanScreenState extends State<ScanScreen> {
       if (decoded is Map) {
         final raw = decoded['items'] ?? decoded['scanned_items'];
         if (raw is List) {
-          return raw.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+          return raw
+              .map((e) => e.toString())
+              .where((s) => s.isNotEmpty)
+              .toList();
         }
       }
       if (decoded is List) {
-        return decoded.map((e) => e.toString()).where((s) => s.isNotEmpty).toList();
+        return decoded
+            .map((e) => e.toString())
+            .where((s) => s.isNotEmpty)
+            .toList();
       }
     } catch (_) {}
 
@@ -164,6 +178,12 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future<void> _saveScannedItems(List<String> items) async {
+    // Guests aren't signed in, so scanned items stay in memory for this
+    // session instead of being written to a Firestore user doc.
+    if (GuestSession.isGuest) {
+      if (mounted) setState(() => _localScannedItems = items);
+      return;
+    }
     final uid = _user?.uid;
     if (uid == null) return;
     await FirebaseFirestore.instance.collection('users').doc(uid).update({
@@ -173,46 +193,37 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Future<void> _startScan() async {
     if (_isScanning) return;
-
-    final on = await _ble.isBluetoothOn();
-    if (!mounted) return;
-    if (!on) {
-      setState(() {
-        _btOn = false;
-        _statusTitle = 'Bluetooth is off';
-        _statusSubtitle = 'Enable Bluetooth in settings, then try again';
-      });
-      return;
-    }
+    final generation = ++_scanGeneration;
 
     setState(() {
-      _btOn = true;
       _isScanning = true;
-      _isConnecting = false;
       _nothingFound = false;
-      _statusTitle = 'Scanning…';
-      _statusSubtitle = 'Keep your backpack still';
+      _statusTitle = 'Scanning...';
+      _statusSubtitle = 'Hold RFID tags near the backpack reader';
     });
 
-    if (_ble.connectedDevice != null) {
-      setState(() {
-        _statusTitle = 'Connected';
-        _statusSubtitle = 'Reading items from your backpack…';
-      });
-      await _ble.sendData('SCAN');
-      await Future.delayed(const Duration(seconds: 8));
+    try {
+      final items = await _pi.scan();
+      if (generation != _scanGeneration) return;
+      if (items.isNotEmpty) await _saveScannedItems(items);
       if (!mounted) return;
-      if (_isScanning) {
-        setState(() {
-          _statusTitle = 'No new data';
-          _statusSubtitle = 'Check that your backpack is sending scan results';
-        });
-        _stopScanningUi(found: false);
-      }
-      return;
+      setState(() {
+        _nothingFound = items.isEmpty;
+        _statusTitle = items.isEmpty ? 'Nothing found' : 'Scan complete';
+        _statusSubtitle = items.isEmpty
+            ? 'No RFID tags were detected'
+            : '${items.length} item${items.length == 1 ? '' : 's'} detected';
+      });
+    } on RaspberryPiException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _nothingFound = true;
+        _statusTitle = 'Connection failed';
+        _statusSubtitle = error.message;
+      });
+    } finally {
+      if (generation == _scanGeneration) _stopScanningUi();
     }
-
-    await _ble.startScan(filterByDeviceName: true);
   }
 
   void _stopScanningUi({bool? found}) {
@@ -225,11 +236,8 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Future<void> _cancelScan() async {
-    await _ble.stopScan();
-    if (_ble.connectedDevice != null) {
-      await _ble.disconnect();
-    }
     if (!mounted) return;
+    _scanGeneration++;
     setState(() {
       _nothingFound = false;
       _statusTitle = 'Scan cancelled';
@@ -240,7 +248,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
   @override
   void dispose() {
-    _ble.removeListener(_onBleStateChanged);
     _dataStreamSub?.cancel();
     super.dispose();
   }
@@ -265,50 +272,56 @@ class _ScanScreenState extends State<ScanScreen> {
         scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(_user?.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 1.5,
-                color: Colors.black45,
-              ),
-            );
-          }
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                'Unable to load scan data',
-                style: TextStyle(color: Colors.black45, fontSize: 14),
-              ),
-            );
-          }
+      body: GuestSession.isGuest
+          ? _buildContent(_localScannedItems)
+          : StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(_user?.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: Colors.black45,
+                    ),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text(
+                      'Unable to load scan data',
+                      style: TextStyle(color: Colors.black45, fontSize: 14),
+                    ),
+                  );
+                }
 
-          final userData = snapshot.data?.data() as Map<String, dynamic>?;
-          final rawItems = userData?['scanned_items'];
-          final scannedItems = rawItems != null
-              ? List<String>.from(rawItems as List)
-              : <String>[];
+                final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                final rawItems = userData?['scanned_items'];
+                final scannedItems = rawItems != null
+                    ? List<String>.from(rawItems as List)
+                    : <String>[];
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatusCard(),
-                const SizedBox(height: 16),
-                _buildScanButton(),
-                const SizedBox(height: 28),
-                _buildItemsSection(scannedItems),
-                const SizedBox(height: 24),
-              ],
+                return _buildContent(scannedItems);
+              },
             ),
-          );
-        },
+    );
+  }
+
+  Widget _buildContent(List<String> scannedItems) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildStatusCard(),
+          const SizedBox(height: 16),
+          _buildScanButton(),
+          const SizedBox(height: 28),
+          _buildItemsSection(scannedItems),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -331,7 +344,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Center(child: _buildLogoOrIcon()),
@@ -346,9 +359,11 @@ class _ScanScreenState extends State<ScanScreen> {
                       horizontal: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Text(
                       _weight!,
@@ -377,7 +392,7 @@ class _ScanScreenState extends State<ScanScreen> {
             _statusSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 13,
             ),
           ),
@@ -389,13 +404,13 @@ class _ScanScreenState extends State<ScanScreen> {
                 Icon(
                   Icons.bluetooth_disabled,
                   size: 14,
-                  color: Colors.white.withOpacity(0.5),
+                  color: Colors.white.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Bluetooth unavailable',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 12,
                   ),
                 ),
@@ -412,24 +427,13 @@ class _ScanScreenState extends State<ScanScreen> {
       return const SizedBox(
         width: 52,
         height: 52,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.white,
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
       );
     }
     if (_nothingFound) {
-      return const Icon(
-        Icons.close,
-        size: 64,
-        color: Colors.redAccent,
-      );
+      return const Icon(Icons.close, size: 64, color: Colors.redAccent);
     }
-    return Icon(
-      Icons.sensors,
-          size: 45,
-          color: Colors.white,
-    );
+    return Icon(Icons.sensors, size: 45, color: Colors.white);
   }
 
   Widget _buildScanButton() {
@@ -458,8 +462,8 @@ class _ScanScreenState extends State<ScanScreen> {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: _btOn ? _startScan : null,
-        icon: const Icon(Icons.bluetooth_searching, size: 18),
+        onPressed: _startScan,
+        icon: const Icon(Icons.sensors, size: 18),
         label: const Text(
           'Scan',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -495,7 +499,7 @@ class _ScanScreenState extends State<ScanScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -517,7 +521,7 @@ class _ScanScreenState extends State<ScanScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withOpacity(0.06)),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
             ),
             child: Column(
               children: [
@@ -541,7 +545,7 @@ class _ScanScreenState extends State<ScanScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withOpacity(0.06)),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
             ),
             child: Column(
               children: List.generate(scannedItems.length, (i) {

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:backpackhelp/GuestSession.dart';
 import 'package:backpackhelp/constants.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -249,6 +250,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextButton.styleFrom(foregroundColor: Colors.black54),
                   child: const Text(
                     "Don't have an account? Sign up",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                ),
+              ),
+
+              // Guest link
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    GuestSession.start();
+                    Navigator.pushReplacementNamed(context, "/bottombar");
+                  },
+                  style: TextButton.styleFrom(foregroundColor: Colors.black38),
+                  child: const Text(
+                    "Continue as Guest",
                     style: TextStyle(fontSize: 13),
                   ),
                 ),

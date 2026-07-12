@@ -1,16 +1,14 @@
-# backpackhelp
+# Backpack Help
 
-A new Flutter project.
+Flutter app with a Raspberry Pi 5 and RFID-RC522 backpack scanner.
 
-## Getting Started
+1. Wire and install the Pi service by following
+   [`raspberry_pi/README.md`](raspberry_pi/README.md).
+2. For access from different Wi-Fi networks, install Tailscale on the phone
+   and Pi, then sign both into the same Tailscale account.
+3. In the app, open **Connection**, enter the Pi's Tailscale address such as
+   `http://100.x.x.x:8000`, and tap **Save and test connection**.
+4. Open **Bag Scan** and tap **Scan**.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The app asks the Pi to scan for eight seconds, receives the detected RFID tag
+UIDs, and saves them in the signed-in user's Firestore `scanned_items` field.

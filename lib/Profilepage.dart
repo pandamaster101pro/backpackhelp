@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:backpackhelp/GuestSession.dart';
 import 'package:backpackhelp/constants.dart';
 
 class Profilepage extends StatefulWidget {
@@ -213,6 +214,8 @@ class _ProfilepageState extends State<Profilepage> {
 
   @override
   Widget build(BuildContext context) {
+    if (GuestSession.isGuest) return _buildGuestView(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F5),
       appBar: AppBar(
@@ -428,6 +431,106 @@ class _ProfilepageState extends State<Profilepage> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildGuestView(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F5),
+      appBar: AppBar(
+        title: const Text(
+          "Profile",
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFFF7F7F5),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.black.withOpacity(0.06)),
+                ),
+                child: const Icon(Icons.person_outline, size: 28, color: Colors.black38),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                "You're browsing as a guest",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Create an account to save your profile and keep your scanned items across sessions.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Colors.black45, height: 1.6),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    GuestSession.end();
+                    Navigator.pushReplacementNamed(context, "/signupscreen");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black87,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    "Create an account",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    GuestSession.end();
+                    Navigator.pushReplacementNamed(context, "/login");
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black87,
+                    side: const BorderSide(color: Colors.black26),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text(
+                    "Log in",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

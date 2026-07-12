@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:backpackhelp/GuestSession.dart';
 import 'package:backpackhelp/Login.dart';
 import 'constants.dart';
 
@@ -235,6 +236,21 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   child: const Text(
                     "Already have an account? Log in",
+                    style: TextStyle(fontSize: 13),
+                  ),
+                ),
+              ),
+
+              // Guest link
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    GuestSession.start();
+                    Navigator.pushReplacementNamed(context, "/bottombar");
+                  },
+                  style: TextButton.styleFrom(foregroundColor: Colors.black38),
+                  child: const Text(
+                    "Continue as Guest",
                     style: TextStyle(fontSize: 13),
                   ),
                 ),
