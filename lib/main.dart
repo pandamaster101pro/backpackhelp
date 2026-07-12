@@ -1,4 +1,3 @@
-import 'package:backpackhelp/Ollama.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:backpackhelp/Bottem_bar.dart';
@@ -34,7 +33,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "/",
       routes: {
-        //"/": (context) => Splashscreen(),
+        "/": (context) => Splashscreen(),
         "/login": (context) => LoginScreen(),
         "/homescreen": (context) => Homescreen(),
         "/scan": (context) => ScanScreen(),
@@ -42,8 +41,6 @@ class MyApp extends StatelessWidget {
         "/bottombar": (context) => bottom_bar(),
         "/profilepage": (context) => Profilepage(),
         "/connection": (context) => const ConnectionScreen(),
-        "/": (context) => Ai(),
-
       },
     );
   }

@@ -31,7 +31,6 @@ dependencies:
   http: ^1.2.0
   shared_preferences: ^2.3.0
   flutter_blue_plus: ^1.32.0
-  ollama_dart: ^2.3.0
 
   flutter:
     sdk: flutter
