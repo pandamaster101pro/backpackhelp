@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:backpackhelp/GuestSession.dart';
-import 'package:backpackhelp/Login.dart';
 import 'constants.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -48,22 +47,22 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       //Creates a account where it sends the users input to firebase (firebase auth)
-      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email_controller.text.trim(),
-        password: password_controller.text.trim(),
-      );
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: email_controller.text.trim(),
+            password: password_controller.text.trim(),
+          );
 
       //it stores the new user’s info in Firestore by creating a document in the Users collection containing their unique UID, name, and email.
       await FirebaseFirestore.instance
           .collection("users")
           .doc(credential.user!.uid)
           .set({
-        "name": name_controller.text.trim(),
-        "email": email_controller.text.trim(),
-      });
+            "name": name_controller.text.trim(),
+            "email": email_controller.text.trim(),
+          });
 
       if (mounted) Navigator.pushReplacementNamed(context, "/bottombar");
-
     } catch (e) {
       setState(() => error = "Failed to create account. Please try again.");
     } finally {
@@ -74,13 +73,8 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F5),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFFF7F7F5),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Form(
@@ -96,24 +90,22 @@ class _SignupScreenState extends State<SignupScreen> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                  letterSpacing: -0.5,
+                  color: AppColors.ink,
                 ),
               ),
               const SizedBox(height: 4),
               const Text(
                 "Fill in your details to get started",
-                style: TextStyle(fontSize: 14, color: Colors.black45),
+                style: TextStyle(fontSize: 14, color: AppColors.muted),
               ),
 
               const SizedBox(height: 32),
 
-
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black.withOpacity(0.06)),
+                  borderRadius: BorderRadius.circular(AppRadii.card),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   children: [
@@ -122,10 +114,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       label: "Name",
                       icon: Icons.person_outline,
                       isFirst: true,
-                      validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? "Name is required" : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Name is required"
+                          : null,
                     ),
-                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0EE)),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xFFF0F0EE),
+                    ),
                     _SignupField(
                       controller: email_controller,
                       label: "Email",
@@ -133,12 +130,17 @@ class _SignupScreenState extends State<SignupScreen> {
                       keyboardType: TextInputType.emailAddress,
                       validator: (v) {
                         // validator makes sure the email is valid
-                        if (v == null || v.trim().isEmpty) return "Email is required";
+                        if (v == null || v.trim().isEmpty)
+                          return "Email is required";
                         if (!v.contains('@')) return "Enter a valid email";
                         return null;
                       },
                     ),
-                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0EE)),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xFFF0F0EE),
+                    ),
                     _SignupField(
                       controller: password_controller,
                       label: "Password",
@@ -147,12 +149,17 @@ class _SignupScreenState extends State<SignupScreen> {
                       toggleObscure: () =>
                           setState(() => obscurePassword = !obscurePassword),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return "Password is required";
+                        if (v == null || v.isEmpty)
+                          return "Password is required";
                         if (v.length < 6) return "Minimum 6 characters";
                         return null;
                       },
                     ),
-                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0EE)),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xFFF0F0EE),
+                    ),
                     _SignupField(
                       controller: confirm_password_controller,
                       label: "Confirm Password",
@@ -178,13 +185,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline,
-                          size: 14, color: Colors.redAccent),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 14,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         error,
                         style: const TextStyle(
-                            fontSize: 13, color: Colors.redAccent),
+                          fontSize: 13,
+                          color: Colors.redAccent,
+                        ),
                       ),
                     ],
                   ),
@@ -196,31 +208,31 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : signup,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.black26,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadii.control),
                     ),
                   ),
                   child: isLoading
                       ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Text(
-                    "Sign Up",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                          "Sign Up",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
 
@@ -232,7 +244,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: () =>
                       Navigator.pushReplacementNamed(context, "/login"),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.black54,
+                    foregroundColor: AppColors.primary,
                   ),
                   child: const Text(
                     "Already have an account? Log in",
@@ -248,7 +260,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     GuestSession.start();
                     Navigator.pushReplacementNamed(context, "/bottombar");
                   },
-                  style: TextButton.styleFrom(foregroundColor: Colors.black38),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.muted),
                   child: const Text(
                     "Continue as Guest",
                     style: TextStyle(fontSize: 13),
@@ -297,25 +309,29 @@ class _SignupField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       validator: validator,
-      style: const TextStyle(fontSize: 14, color: Colors.black87),
+      style: const TextStyle(fontSize: 14, color: AppColors.ink),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(fontSize: 13, color: Colors.black38),
-        prefixIcon: Icon(icon, size: 18, color: Colors.black38),
+        labelStyle: const TextStyle(fontSize: 13, color: AppColors.muted),
+        prefixIcon: Icon(icon, size: 18, color: AppColors.muted),
         suffixIcon: toggleObscure != null
             ? IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            size: 18,
-            color: Colors.black38,
-          ),
-          onPressed: toggleObscure,
-        )
+                icon: Icon(
+                  obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: 18,
+                  color: AppColors.muted,
+                ),
+                onPressed: toggleObscure,
+              )
             : null,
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.only(
             topLeft: isFirst ? const Radius.circular(12) : Radius.zero,

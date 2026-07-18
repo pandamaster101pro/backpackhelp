@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:backpackhelp/constants.dart';
 import 'package:backpackhelp/GuestSession.dart';
 import 'package:backpackhelp/bluetooth.dart';
 import 'package:backpackhelp/raspberry_pi_client.dart';
@@ -17,7 +18,7 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  static const _background = Color(0xFFF7F7F5);
+  static const _background = AppColors.background;
 
   final _ble = BluetoothManager.instance;
   final _pi = RaspberryPiClient.instance;
@@ -256,22 +257,7 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _background,
-      appBar: AppBar(
-        title: const Text(
-          'Bag Scan',
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.3,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: _background,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
+      appBar: AppBar(title: const Text('Bag Scan')),
       body: GuestSession.isGuest
           ? _buildContent(_localScannedItems)
           : StreamBuilder<DocumentSnapshot>(
@@ -311,10 +297,24 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Widget _buildContent(List<String> scannedItems) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 104),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            "Scan Backpack",
+            style: TextStyle(
+              color: AppColors.ink,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Use the RFID reader to update what is inside.",
+            style: TextStyle(color: AppColors.muted, fontSize: 14),
+          ),
+          const SizedBox(height: 18),
           _buildStatusCard(),
           const SizedBox(height: 16),
           _buildScanButton(),
@@ -331,8 +331,14 @@ class _ScanScreenState extends State<ScanScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.black87,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadii.card),
+        gradient: LinearGradient(
+          colors: _nothingFound
+              ? const [AppColors.danger, AppColors.coral]
+              : const [AppColors.primary, AppColors.teal],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
       child: Column(
         children: [
@@ -346,6 +352,9 @@ class _ScanScreenState extends State<ScanScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.18),
+                  ),
                 ),
                 child: Center(child: _buildLogoOrIcon()),
               ),
@@ -382,9 +391,8 @@ class _ScanScreenState extends State<ScanScreen> {
             _statusTitle,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
             ),
           ),
           const SizedBox(height: 6),
@@ -461,19 +469,19 @@ class _ScanScreenState extends State<ScanScreen> {
 
     return SizedBox(
       width: double.infinity,
-      child: OutlinedButton.icon(
+      child: ElevatedButton.icon(
         onPressed: _startScan,
         icon: const Icon(Icons.sensors, size: 18),
         label: const Text(
-          'Scan',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          'Start scan',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
         ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.black87,
-          side: const BorderSide(color: Colors.black26),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppRadii.control),
           ),
         ),
       ),
@@ -491,23 +499,22 @@ class _ScanScreenState extends State<ScanScreen> {
               'Detected Items',
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-                letterSpacing: 0.1,
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppRadii.control),
               ),
               child: Text(
                 '${scannedItems.length} items',
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -520,22 +527,22 @@ class _ScanScreenState extends State<ScanScreen> {
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              border: Border.all(color: AppColors.border),
             ),
             child: Column(
               children: [
                 Icon(
                   _isScanning ? Icons.radar : Icons.inventory_2_outlined,
                   size: 32,
-                  color: _isScanning ? Colors.black38 : Colors.black26,
+                  color: _isScanning ? AppColors.primary : AppColors.muted,
                 ),
                 const SizedBox(height: 10),
                 Text(
                   _isScanning
                       ? 'Searching for items…'
                       : 'No items detected yet',
-                  style: const TextStyle(fontSize: 14, color: Colors.black38),
+                  style: const TextStyle(fontSize: 14, color: AppColors.muted),
                 ),
               ],
             ),
@@ -544,8 +551,8 @@ class _ScanScreenState extends State<ScanScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              border: Border.all(color: AppColors.border),
             ),
             child: Column(
               children: List.generate(scannedItems.length, (i) {
@@ -564,12 +571,14 @@ class _ScanScreenState extends State<ScanScreen> {
                             height: 32,
                             decoration: BoxDecoration(
                               color: _background,
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(
+                                AppRadii.control,
+                              ),
                             ),
                             child: const Icon(
                               Icons.inventory_2_outlined,
                               size: 16,
-                              color: Colors.black45,
+                              color: AppColors.teal,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -578,8 +587,8 @@ class _ScanScreenState extends State<ScanScreen> {
                               item,
                               style: const TextStyle(
                                 fontSize: 14,
-                                color: Colors.black87,
-                                fontWeight: FontWeight.w500,
+                                color: AppColors.ink,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -587,7 +596,7 @@ class _ScanScreenState extends State<ScanScreen> {
                             '#${i + 1}',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.black26,
+                              color: AppColors.muted,
                             ),
                           ),
                         ],

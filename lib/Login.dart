@@ -52,13 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F5),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFFF7F7F5),
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Form(
@@ -74,14 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
-                  letterSpacing: -0.5,
+                  color: AppColors.ink,
                 ),
               ),
               const SizedBox(height: 4),
               const Text(
                 "Sign in to your account",
-                style: TextStyle(fontSize: 14, color: Colors.black45),
+                style: TextStyle(fontSize: 14, color: AppColors.muted),
               ),
 
               const SizedBox(height: 32),
@@ -90,8 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.black.withOpacity(0.06)),
+                  borderRadius: BorderRadius.circular(AppRadii.card),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   children: [
@@ -99,90 +93,162 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: email_controller,
                       keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.ink,
+                      ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return "Email is required";
+                        if (v == null || v.trim().isEmpty)
+                          return "Email is required";
                         if (!v.contains('@')) return "Enter a valid email";
                         return null;
                       },
                       decoration: InputDecoration(
                         labelText: "Email",
-                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black38),
-                        prefixIcon: const Icon(Icons.mail_outline, size: 18, color: Colors.black38),
+                        labelStyle: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.muted,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.mail_outline,
+                          size: 18,
+                          color: AppColors.muted,
+                        ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.black26, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.black26,
+                            width: 1,
+                          ),
                         ),
                         errorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.redAccent, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.redAccent,
+                            width: 1,
+                          ),
                         ),
                         focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.redAccent, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.redAccent,
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
 
-                    const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0EE)),
+                    const Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: Color(0xFFF0F0EE),
+                    ),
 
                     // Password field
                     TextFormField(
                       controller: password_controller,
                       obscureText: obscurePassword,
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                       validator: (v) {
-                        if (v == null || v.isEmpty) return "Password is required";
+                        if (v == null || v.isEmpty)
+                          return "Password is required";
                         if (v.length < 6) return "Minimum 6 characters";
                         return null;
                       },
                       decoration: InputDecoration(
                         labelText: "Password",
-                        labelStyle: const TextStyle(fontSize: 13, color: Colors.black38),
-                        prefixIcon: const Icon(Icons.lock_outline, size: 18, color: Colors.black38),
+                        labelStyle: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black38,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.lock_outline,
+                          size: 18,
+                          color: Colors.black38,
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             obscurePassword
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
                             size: 18,
-                            color: Colors.black38,
+                            color: AppColors.muted,
                           ),
-                          onPressed: () => setState(() => obscurePassword = !obscurePassword),
+                          onPressed: () => setState(
+                            () => obscurePassword = !obscurePassword,
+                          ),
                         ),
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(12),
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         enabledBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(12),
+                          ),
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.black26, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.black26,
+                            width: 1,
+                          ),
                         ),
                         errorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.redAccent, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.redAccent,
+                            width: 1,
+                          ),
                         ),
                         focusedErrorBorder: const OutlineInputBorder(
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-                          borderSide: BorderSide(color: Colors.redAccent, width: 1),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(12),
+                          ),
+                          borderSide: BorderSide(
+                            color: Colors.redAccent,
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -198,12 +264,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, size: 14, color: Colors.redAccent),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 14,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           error,
-                          style: const TextStyle(fontSize: 13, color: Colors.redAccent),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.redAccent,
+                          ),
                         ),
                       ),
                     ],
@@ -216,28 +289,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: Colors.black26,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadii.control),
                     ),
                   ),
                   child: isLoading
                       ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
                       : const Text(
-                    "Log In",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
+                          "Log In",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
 
@@ -246,8 +322,11 @@ class _LoginScreenState extends State<LoginScreen> {
               // Sign up link
               Center(
                 child: TextButton(
-                  onPressed: () => Navigator.pushReplacementNamed(context, "/signupscreen"),
-                  style: TextButton.styleFrom(foregroundColor: Colors.black54),
+                  onPressed: () =>
+                      Navigator.pushReplacementNamed(context, "/signupscreen"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                  ),
                   child: const Text(
                     "Don't have an account? Sign up",
                     style: TextStyle(fontSize: 13),
@@ -262,7 +341,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     GuestSession.start();
                     Navigator.pushReplacementNamed(context, "/bottombar");
                   },
-                  style: TextButton.styleFrom(foregroundColor: Colors.black38),
+                  style: TextButton.styleFrom(foregroundColor: AppColors.muted),
                   child: const Text(
                     "Continue as Guest",
                     style: TextStyle(fontSize: 13),

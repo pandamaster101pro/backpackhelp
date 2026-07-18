@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:backpackhelp/GuestSession.dart';
-import 'package:backpackhelp/constants.dart';
 
 class Profilepage extends StatefulWidget {
   const Profilepage({super.key});
@@ -41,10 +40,7 @@ class _ProfilepageState extends State<Profilepage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.uid)
-          .set(
+      await FirebaseFirestore.instance.collection('users').doc(user?.uid).set(
         {
           'email': gmail_controller.text.trim(),
           'name': name_controller.text.trim(),
@@ -62,7 +58,9 @@ class _ProfilepageState extends State<Profilepage> {
             content: const Text("Profile updated"),
             backgroundColor: Colors.black87,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -73,7 +71,9 @@ class _ProfilepageState extends State<Profilepage> {
             content: const Text("Failed to update profile"),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         );
       }
@@ -90,7 +90,9 @@ class _ProfilepageState extends State<Profilepage> {
         return StatefulBuilder(
           builder: (context, setDialogState) => AlertDialog(
             backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             title: const Text(
               "Confirm password",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -110,7 +112,10 @@ class _ProfilepageState extends State<Profilepage> {
                   borderSide: const BorderSide(color: Colors.black54),
                 ),
                 suffixIcon: IconButton(
-                  icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, size: 18),
+                  icon: Icon(
+                    obscure ? Icons.visibility_off : Icons.visibility,
+                    size: 18,
+                  ),
                   onPressed: () => setDialogState(() => obscure = !obscure),
                 ),
               ),
@@ -118,14 +123,23 @@ class _ProfilepageState extends State<Profilepage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text("Cancel", style: TextStyle(color: Colors.black45)),
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.black45),
+                ),
               ),
               TextButton(
                 onPressed: () {
                   password = controller.text;
                   Navigator.of(context).pop();
                 },
-                child: const Text("Confirm", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+                child: const Text(
+                  "Confirm",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -158,7 +172,11 @@ class _ProfilepageState extends State<Profilepage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.bluetooth, size: 20, color: Colors.black54),
+                leading: const Icon(
+                  Icons.bluetooth,
+                  size: 20,
+                  color: Colors.black54,
+                ),
                 title: const Text("Bluetooth", style: TextStyle(fontSize: 15)),
                 onTap: () {
                   Navigator.pop(context);
@@ -166,12 +184,20 @@ class _ProfilepageState extends State<Profilepage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.logout, size: 20, color: Colors.black54),
+                leading: const Icon(
+                  Icons.logout,
+                  size: 20,
+                  color: Colors.black54,
+                ),
                 title: const Text("Log out", style: TextStyle(fontSize: 15)),
                 onTap: () => Navigator.pop(context, 'logout'),
               ),
               ListTile(
-                leading: const Icon(Icons.delete_outline, size: 20, color: Colors.redAccent),
+                leading: const Icon(
+                  Icons.delete_outline,
+                  size: 20,
+                  color: Colors.redAccent,
+                ),
                 title: const Text(
                   "Delete account",
                   style: TextStyle(fontSize: 15, color: Colors.redAccent),
@@ -195,7 +221,10 @@ class _ProfilepageState extends State<Profilepage> {
         );
         await user?.reauthenticateWithCredential(credential);
         await user?.delete();
-        await FirebaseFirestore.instance.collection('users').doc(user?.uid).delete();
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .delete();
         if (mounted) Navigator.pushReplacementNamed(context, "/signupscreen");
       } catch (e) {
         if (mounted) {
@@ -204,7 +233,9 @@ class _ProfilepageState extends State<Profilepage> {
               content: const Text("Failed to delete account, please try again"),
               backgroundColor: Colors.redAccent,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           );
         }
@@ -249,7 +280,10 @@ class _ProfilepageState extends State<Profilepage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.black45),
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: Colors.black45,
+              ),
             );
           }
           if (snapshot.hasError) {
@@ -292,7 +326,7 @@ class _ProfilepageState extends State<Profilepage> {
                           backgroundColor: Colors.black12,
                           child: ClipOval(
                             child: Image.asset(
-                              "Assets/Profileimage.png",
+                              "Assets/ProfileImage.png",
                               fit: BoxFit.cover,
                               width: 76,
                               height: 76,
@@ -345,7 +379,10 @@ class _ProfilepageState extends State<Profilepage> {
                         ),
                         child: const Text(
                           "Edit Profile",
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -354,7 +391,9 @@ class _ProfilepageState extends State<Profilepage> {
                     _MinimalField(
                       controller: name_controller,
                       label: "Name",
-                      validator: (v) => (v == null || v.trim().isEmpty) ? "Name is required" : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Name is required"
+                          : null,
                     ),
                     const SizedBox(height: 14),
                     _MinimalField(
@@ -362,7 +401,8 @@ class _ProfilepageState extends State<Profilepage> {
                       label: "Email",
                       keyboardType: TextInputType.emailAddress,
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return "Email is required";
+                        if (v == null || v.trim().isEmpty)
+                          return "Email is required";
                         if (!v.contains('@')) return "Enter a valid email";
                         return null;
                       },
@@ -371,15 +411,20 @@ class _ProfilepageState extends State<Profilepage> {
                     _MinimalField(
                       controller: year_controller,
                       label: "Year (e.g. Sophomore)",
-                      validator: (v) => (v == null || v.trim().isEmpty) ? "Year is required" : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? "Year is required"
+                          : null,
                     ),
                     const SizedBox(height: 14),
                     _MinimalField(
                       controller: gpa_controller,
                       label: "GPA",
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return "GPA is required";
+                        if (v == null || v.trim().isEmpty)
+                          return "GPA is required";
                         final parsed = double.tryParse(v.trim());
                         if (parsed == null || parsed < 0 || parsed > 4.0) {
                           return "Enter a valid GPA (0.0 – 4.0)";
@@ -401,7 +446,10 @@ class _ProfilepageState extends State<Profilepage> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text("Cancel", style: TextStyle(fontSize: 14)),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(fontSize: 14),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -419,7 +467,10 @@ class _ProfilepageState extends State<Profilepage> {
                             ),
                             child: const Text(
                               "Save",
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
@@ -468,7 +519,11 @@ class _ProfilepageState extends State<Profilepage> {
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.black.withOpacity(0.06)),
                 ),
-                child: const Icon(Icons.person_outline, size: 28, color: Colors.black38),
+                child: const Icon(
+                  Icons.person_outline,
+                  size: 28,
+                  color: Colors.black38,
+                ),
               ),
               const SizedBox(height: 20),
               const Text(
@@ -485,7 +540,11 @@ class _ProfilepageState extends State<Profilepage> {
               const Text(
                 "Create an account to save your profile and keep your scanned items across sessions.",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.black45, height: 1.6),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black45,
+                  height: 1.6,
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -500,7 +559,9 @@ class _ProfilepageState extends State<Profilepage> {
                     foregroundColor: Colors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text(
                     "Create an account",
@@ -520,7 +581,9 @@ class _ProfilepageState extends State<Profilepage> {
                     foregroundColor: Colors.black87,
                     side: const BorderSide(color: Colors.black26),
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   child: const Text(
                     "Log in",
@@ -555,7 +618,10 @@ class _InfoCard extends StatelessWidget {
           return Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -579,7 +645,11 @@ class _InfoCard extends StatelessWidget {
                 ),
               ),
               if (i < fields.length - 1)
-                const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0EE)),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFF0F0EE),
+                ),
             ],
           );
         }),
@@ -619,7 +689,10 @@ class _MinimalField extends StatelessWidget {
         labelStyle: const TextStyle(fontSize: 13, color: Colors.black45),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.black12),
